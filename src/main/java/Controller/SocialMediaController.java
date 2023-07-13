@@ -1,43 +1,13 @@
 package Controller;
 
 import java.util.List;
-
-/**
- * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
- * found in readme.md as well as the test cases. You should
- * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
- */
-/*public class SocialMediaController {
-    
-    /**
-     * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
-     * suite must receive a Javalin object from this method.
-     * @return a Javalin app object which defines the behavior of the Javalin controller.
-     
-    public Javalin startAPI() {
-        Javalin app = Javalin.create();
-        app.get("example-endpoint", this::exampleHandler);
-
-        return app;
-    }
-
-    /**
-     * This is an example handler for an example endpoint.
-     * @param context The Javalin Context object manages information about both the HTTP request and response.
-     
-    private void exampleHandler(Context context) {
-        //context.json("sample text");
-    }
-    
-}
-*/
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import Model.Account;
 import Model.Message;
 import Service.AccountService;
 import Service.MessageService;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
@@ -48,41 +18,57 @@ public class SocialMediaController {
     private final ObjectMapper objectMapper;
 
     public SocialMediaController() {
+        // Initialize the dependencies
         messageService = new MessageService();
         accountService = new AccountService();
         objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Initializes a Javalin instance, sets up the routes for handling HTTP requests,
+     * and returns the initialized Javalin instance.
+     *
+     * @return the initialized Javalin instance
+     */
     public Javalin startAPI() {
 
         Javalin app = Javalin.create();
 
-        // Register a user
+        // Register routes for handling HTTP requests
+
+        // Register a new user
         app.post("/register", this::registerUserHandler);
         // User login
         app.post("/login", this::loginUserHandler);
-        // Create a message
+        // Create a new message
         app.post("/messages", this::createMessageHandler);
         // Retrieve all messages
         app.get("/messages", this::getAllMessagesHandler);
-        // Retrieve a message by ID
+        // Retrieve a message by message ID
         app.get("/messages/{message_id}", this::getMessageByIdHandler);
-        // localhost:8080/accounts/{account_id}/messages.
+        // Retrieve all messages by account ID
         app.get("/accounts/{account_id}/messages", this::getMessageByUserIdHandler);
-        // Delete message by ID
+        // Delete message by message ID
         app.delete("/messages/{message_id}", this::deleteMessageByIDHandler);
-        // Update a message
+        // Update a message by message ID
         app.patch("/messages/{message_id}", this::updateMessageByIDHandler);
 
         return app;
     }
 
+    /**
+     * Handles the creation of a new message.
+     *
+     * @param ctx the Javalin context
+     */
     private void createMessageHandler(Context ctx) {
         try {
+            // Deserialize the request body JSON into a Message object
             Message message = objectMapper.readValue(ctx.body(), Message.class);
+            // Call the messageService to create the message
             Message createdMessage = messageService.createMessage(message);
             if (createdMessage != null) {
-                // String response = objectMapper.writeValueAsString(createdMessage);
+                // Set the response body JSON to the created message
                 ctx.json(createdMessage).status(200);
             } else {
                 ctx.status(400);
@@ -93,44 +79,74 @@ public class SocialMediaController {
         }
     }
 
+    /**
+     * Retrieves all messages.
+     *
+     * @param ctx the Javalin context
+     */
     private void getAllMessagesHandler(Context ctx) {
+        // Call the messageService to get all messages
         List<Message> messages = messageService.getAllMessages();
-        // ctx.json(messages).status(200);
         if (messages != null) {
+            // Set the response body JSON to the list of messages
             ctx.json(messages).status(200);
         } else {
             ctx.status(200).result("");
         }
     }
 
+    /**
+     * Retrieves a message by its message ID.
+     *
+     * @param ctx the Javalin context
+     */
     private void getMessageByIdHandler(Context ctx) {
+        // Get the message ID from the URL path parameter
         int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        // Call the messageService to get the message by its ID
         Message message = messageService.getMessageById(messageId);
-        // ctx.json(message).status(200);
         if (message != null) {
+            // Set the response body JSON to the retrieved message
             ctx.json(message).status(200);
         } else {
             ctx.status(200).result("");
         }
     }
 
+    /**
+     * Deletes a message by its message ID.
+     *
+     * @param ctx the Javalin context
+     */
     private void deleteMessageByIDHandler(Context ctx) {
+        // Get the message ID from the URL path parameter
         int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        // Call the messageService to delete the message by its ID
         Message deletedMessage = messageService.deleteMessage(messageId);
 
         if (deletedMessage != null) {
+            // Set the response body JSON to the now deleted message
             ctx.json(deletedMessage).status(200);
         } else {
             ctx.status(200).result("");
         }
     }
 
+    /**
+     * Updates a message by its message ID.
+     *
+     * @param ctx the Javalin context
+     */
     private void updateMessageByIDHandler(Context ctx) {
         try {
-            int message_id = Integer.parseInt(ctx.pathParam("message_id"));
+            // Get the message ID from the URL path parameter
+            int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+            // Deserialize the request body JSON into a Message object
             Message message = objectMapper.readValue(ctx.body(), Message.class);
-            Message updatedMessage = messageService.updateMessageText(message.getMessage_text(), message_id);
+            // Call the messageService to update the message by its ID
+            Message updatedMessage = messageService.updateMessageText(message.getMessage_text(), messageId);
             if (updatedMessage != null) {
+                // Set the response body JSON to the updated message
                 ctx.json(updatedMessage).status(200);
             } else {
                 ctx.status(400);
@@ -141,11 +157,19 @@ public class SocialMediaController {
         }
     }
 
+    /**
+     * Handles the registration of a new user.
+     *
+     * @param ctx the Javalin context
+     */
     private void registerUserHandler(Context ctx) {
         try {
+            // Deserialize the request body JSON into an Account object
             Account account = objectMapper.readValue(ctx.body(), Account.class);
+            // Call the accountService to register the user account
             Account registeredAccount = accountService.registerAccount(account.getUsername(), account.getPassword());
             if (registeredAccount != null) {
+                // Set the response body JSON to the registered account
                 ctx.json(registeredAccount).status(200);
             } else {
                 ctx.status(400);
@@ -156,11 +180,19 @@ public class SocialMediaController {
         }
     }
 
+    /**
+     * Handles user login.
+     *
+     * @param ctx the Javalin context
+     */
     private void loginUserHandler(Context ctx) {
         try {
+            // Deserialize the request body JSON into an Account object
             Account account = objectMapper.readValue(ctx.body(), Account.class);
+            // Call the accountService to perform user login
             Account loggedInAccount = accountService.login(account.getUsername(), account.getPassword());
             if (loggedInAccount != null) {
+                // Set the response body JSON to the logged-in account
                 ctx.json(loggedInAccount).status(200);
             } else {
                 ctx.status(401);
@@ -171,14 +203,21 @@ public class SocialMediaController {
         }
     }
 
+    /**
+     * Retrieves all messages posted by a specific user using account ID.
+     *
+     * @param ctx the Javalin context
+     */
     private void getMessageByUserIdHandler(Context ctx) {
-        int postedby = Integer.parseInt(ctx.pathParam("account_id"));
-        List<Message> messages = messageService.getMessagesByAccountId(postedby);
+        // Get the account ID from the URL path parameter
+        int accountId = Integer.parseInt(ctx.pathParam("account_id"));
+        // Call the messageService to get messages by account ID
+        List<Message> messages = messageService.getMessagesByAccountId(accountId);
         if (messages != null) {
+            // Set the response body JSON to the list of messages
             ctx.json(messages).status(200);
         } else {
             ctx.status(200).result("");
         }
     }
 }
-

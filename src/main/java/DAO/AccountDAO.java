@@ -23,7 +23,7 @@ public class AccountDAO {
         List<Account> accounts = new ArrayList<>();
 
         try {
-            String sql = "SELECT * FROM Account";
+            String sql = "SELECT * FROM account";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
@@ -47,7 +47,7 @@ public class AccountDAO {
     public Account getAccountById(int id) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT * FROM Account WHERE Account_ID = ?";
+            String sql = "SELECT * FROM account WHERE Account_ID = ?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
@@ -105,7 +105,7 @@ public class AccountDAO {
     public void updateAccount(int id, Account account) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "UPDATE Account SET user_name = ?, password = ? WHERE Account_id = ?";
+            String sql = "UPDATE account SET user_name = ?, password = ? WHERE Account_id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             preparedStatement.setString(1, account.getUsername());
@@ -126,7 +126,7 @@ public class AccountDAO {
     public void deleteAccount(int id) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "DELETE FROM Account WHERE Account_id = ?";
+            String sql = "DELETE FROM account WHERE Account_id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             preparedStatement.setInt(1, id);
@@ -166,10 +166,16 @@ public class AccountDAO {
         return null;
     }
 
+    /**
+     * Retrieve an Account using its username.
+     *
+     * @param username the username of the Account.
+     * @return the Account object with the specified username, or null if not found.
+     */
     public Account getAccountByUsername(String username) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT * FROM Account WHERE user_name = ?";
+            String sql = "SELECT * FROM account WHERE user_name = ?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
@@ -195,15 +201,14 @@ public class AccountDAO {
     public boolean doesAccountExistUsername(String username) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT COUNT(*) FROM Account WHERE user_name = ?";
+            String sql = "SELECT * FROM account WHERE user_name = ?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
 
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                int count = rs.getInt(1);
-                return count > 0;
+                return true;
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -211,18 +216,23 @@ public class AccountDAO {
         return false;
     }
 
+    /**
+     * Check if an account with the given account ID already exists.
+     *
+     * @param account_id the account ID to check.
+     * @return true if the account exists, false otherwise.
+     */
     public boolean doesAccountExistAccountID(int account_id) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT COUNT(*) FROM Account WHERE account_id  = ?";
+            String sql = "SELECT * FROM account WHERE account_id  = ?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, account_id);
 
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                int count = rs.getInt(1);
-                return count > 0;
+                return true;
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());

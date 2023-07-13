@@ -72,7 +72,6 @@ public class MessageService {
     public Message updateMessageText(String message, int message_id) {
         Message existingmessage = getMessageById(message_id);
         if ((existingmessage != null) && isMessageValid(message)) {
-            // messageDAO.setMessage_text(message.getMessage_text());
             messageDAO.updateMessageText(message_id, message);
             return messageDAO.getMessageById(message_id);
         }
@@ -97,7 +96,6 @@ public class MessageService {
      * @return true if the message is valid, false otherwise.
      */
     private boolean isMessageValid(String message) {
-        // String messageText = message.getMessage_text();
         return !message.isBlank() && message.length() < 255;
     }
 }
