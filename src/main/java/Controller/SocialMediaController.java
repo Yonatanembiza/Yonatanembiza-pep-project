@@ -13,18 +13,22 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 
 public class SocialMediaController {
-    private final MessageService messageService;
-    private final AccountService accountService;
-    private final ObjectMapper objectMapper;
+    // Instance variables
+    private final MessageService messageService; // Dependency for handling messages
+    private final AccountService accountService; // Dependency for handling user accounts
+    private final ObjectMapper objectMapper;     // Dependency for JSON serialization/deserialization
 
+    // Constructor for SocialMediaController
     public SocialMediaController() {
         // Initialize the dependencies
-        messageService = new MessageService();
-        accountService = new AccountService();
+        messageService = new MessageService(); 
+        accountService = new AccountService(); 
         objectMapper = new ObjectMapper();
     }
 
     /**
+     * Method for starting the API
+     * 
      * Initializes a Javalin instance, sets up the routes for handling HTTP requests,
      * and returns the initialized Javalin instance.
      *
@@ -32,6 +36,7 @@ public class SocialMediaController {
      */
     public Javalin startAPI() {
 
+        // Create a new Javalin instance
         Javalin app = Javalin.create();
 
         // Register routes for handling HTTP requests
@@ -53,6 +58,7 @@ public class SocialMediaController {
         // Update a message by message ID
         app.patch("/messages/{message_id}", this::updateMessageByIDHandler);
 
+        // Return the initialized Javalin instance
         return app;
     }
 
