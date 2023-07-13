@@ -75,19 +75,18 @@ public class AccountDAO {
     public Account insertAccount(String username, String password) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "INSERT INTO Account (user_name, password) VALUES (?, ?)";
+            String sql = "INSERT INTO account (username, password) VALUES (?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, username);
             preparedStatement.setString(2, password);
 
-            int affectedRows = preparedStatement.executeUpdate();
-            if (affectedRows > 0) {
-                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    int generatedAccountId = generatedKeys.getInt(1);
-                    return new Account(generatedAccountId, username, username);
-                }
+            preparedStatement.executeUpdate();
+
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int generatedAccountId = generatedKeys.getInt(1);
+                return new Account(generatedAccountId, username, password);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -149,7 +148,7 @@ public class AccountDAO {
     public Account getAccountByUsernameAndPassword(String username, String password) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT * FROM account WHERE user_name = ? AND password = ?";
+            String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
@@ -157,7 +156,7 @@ public class AccountDAO {
 
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                Account account = new Account(rs.getInt("account_id"), rs.getString("user_name"),
+                Account account = new Account(rs.getInt("account_id"), rs.getString("username"),
                         rs.getString("password"));
                 return account;
             }
@@ -177,7 +176,7 @@ public class AccountDAO {
 
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                Account account = new Account(rs.getInt("Account_id"), rs.getString("user_name"),
+                Account account = new Account(rs.getInt("account_id"), rs.getString("user_name"),
                         rs.getString("password"));
                 return account;
             }
